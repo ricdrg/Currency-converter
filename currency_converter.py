@@ -1,15 +1,11 @@
 """
+
 Currency converter script retrieving rates from exchangerate-api.com
 1° Checking for internet connection to connect to the web API
-2° Retrieving country codes from a csv file and assign it to a variable
-3° Asking datas to the user (what currency country need to be converted to which currency country and the amount)
+2° Prompting the user to get the datas that need to be converted
+3° Retrieving country codes from a csv file and assign it to a variable
 4° Getting the country code matching the country names entered by the user
-5° Returning the value to the user
-
-
-
-Missing function to check internet connection
-Missing error handling
+5° Conversion and return the values to the user
 
 """
 ############################ Internet connection checking function
@@ -24,12 +20,12 @@ def test_intConnection():
     return False
 
 
-############################ Prompt user
+############################ Prompt user function
 # Gathering values to prepare the conversion
 def promptUserdata():
     while True :
         fromCountry = input('Please enter the country from where you want to convert the currency :\n').upper()
-    #Checking that no digits are in the input
+#Checking that no digits are in the input
         if any(char.isdigit() for char in fromCountry) :
             print("Please do not include any digits")
             continue
@@ -46,7 +42,7 @@ def promptUserdata():
 
     while True :
         money = input('Please enter the value that you want to convert :\n')
-                 #Checking that the value entered is digits only
+#Checking that the value entered is digits only
         if not money.isdigit() :
             print('Please enter digits only')
             continue
@@ -57,7 +53,7 @@ def promptUserdata():
     return fromCountry, toCountry, money
 
 
-############################ Country code Retrieving
+############################ Country code retrieving function
 def getCountrycode(from_value, to_value):
     CodeandName_csv = list()
 # Loading the CSV file which contains country codes and currency codes into a variable
@@ -81,34 +77,36 @@ def getCountrycode(from_value, to_value):
 
 ############################ Getting country code from the web with the fromCountryCode input
 def getRate(fromCode):
+#Getting the exchange rates directly to the website
+#Also adding error handling in the case where the country entered by the user is not handled by the API
     try :
         import urllib.request
         page = urllib.request.urlopen("https://api.exchangerate-api.com/v4/latest/" + fromCode)
         web_exchangeRateApi = page.read()
 
         import json
+# Selecting the rates and dates array to a python formatted dictionnary
         json_exchangeRateApi = json.loads(web_exchangeRateApi)
-        # Selecting the rates array to a python formatted dictionnary
         exchangeRateApi_rates = json_exchangeRateApi["rates"]
         exchangeRateApi_date = json_exchangeRateApi["date"]
-        #print(exchangeRateApi_rates)
         return exchangeRateApi_rates, exchangeRateApi_date
 
-        #print(type(toCountryrate))
-    except : #y ajouter un code retour pour une possibilité de boucle dans le code principal
+    except :
         print("Country currency not included in the converter, please try again")
 
 ############################ Conversion
 def conversionOperation(int_value, code1, code2, rates, date):
     toCountryrate = rates[code2]
-    # Math operation to get the conversion
+# Math operation to get the conversion
     moneyConverted = int_value * toCountryrate
     print("So," , int_value , code1 , "equals" , moneyConverted , code2)
-    # Selecting the rate that matches the toCountryCode
+# Selecting the rate that matches the toCountryCode
     print("As of" , date , "," , "1" , code1 , "is sold" , toCountryrate , code2)
 
 
-#Checking internet connection availability
+'''
+The main code that will execute all the functions when needed
+'''
 connection_value = test_intConnection()
 
 if connection_value == True :
@@ -127,7 +125,6 @@ if connection_value == True :
     apiRate = exchangeRateApiDatas[0]
     apiDate = exchangeRateApiDatas[1]
 
-    #Insert in the function the amount, rates, , date, toCountryCode
     conversionOperation(amount, fromCountryCode, toCountryCode, apiRate, apiDate)
 
 else :
